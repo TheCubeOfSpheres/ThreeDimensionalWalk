@@ -3,6 +3,8 @@ import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
 
+
+
 class BasicCharacterControls {
   constructor(params) {
     this._Init(params);
@@ -16,7 +18,7 @@ class BasicCharacterControls {
       left: false,
       right: false,
     };
-    this._decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
+    this._decceleration = new THREE.Vector3(-0.005, -0.0001, -5.0);
     this._acceleration = new THREE.Vector3(1, 0.25, 50.0);
     this._velocity = new THREE.Vector3(0, 0, 0);
 
@@ -87,19 +89,19 @@ class BasicCharacterControls {
     const _R = controlObject.quaternion.clone();
 
     if (this._move.forward) {
-      velocity.z += this._acceleration.z * timeInSeconds;
+      velocity.z += this._acceleration.z * timeInSeconds * 3;
     }
     if (this._move.backward) {
-      velocity.z -= this._acceleration.z * timeInSeconds;
+      velocity.z -= this._acceleration.z * timeInSeconds * 3;
     }
     if (this._move.left) {
       _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, Math.PI * timeInSeconds * this._acceleration.y);
+      _Q.setFromAxisAngle(_A, Math.PI * timeInSeconds * this._acceleration.y * 3);
       _R.multiply(_Q);
     }
     if (this._move.right) {
       _A.set(0, 1, 0);
-      _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * this._acceleration.y);
+      _Q.setFromAxisAngle(_A, -Math.PI * timeInSeconds * this._acceleration.y * 3);
       _R.multiply(_Q);
     }
 
@@ -214,7 +216,7 @@ class BasicWorldDemo {
     const loader = new FBXLoader();
     
     loader.load('/Character/Ch34_nonPBR.fbx', function(fbx) {
-      fbx.scale.setScalar(.1);
+      fbx.scale.setScalar(.05);
       fbx.traverse(c => {
         c.castShadow = true;
       });
