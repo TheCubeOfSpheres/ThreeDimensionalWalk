@@ -1,4 +1,29 @@
 --Useful Terminology--
 RAF - Request Animation Frame
+FSM - Finite State Machine
+Vector - "Get better understanding"
 
 --How to animate and control characters with class based Finite State Machine--
+
+---Basic Character Controler Class---
+!Initialization----
+Constructed with params = obj(camera and the scene) --- 'For access to scene and camera'
+Acceleration, dececeleration and velocity --- control characeter speed
+animations object -- available animations for character
+instance of BasicCharacterController Input --- keyboard/mouse controls
+Instance of CharacterFSM which extend FiniteStateMachine Class --- Statemachine for character
+	The FSM takes an proxy of BasicCharacterControllerClass with (this.animations) passed in
+runs its class function __LoadModels();
+!-------------------
+
+!Functions-----------
+	_LoadModels
+	_Update
+!--------------------
+---------------------------------------------------------------------------------------
+
+
+!Add ThirdPerson camera customization (Mouse wheel in and out to zoom, and button to reset);
+!Integrate start and stop walk animations into controller;
+
+!Procedurally generate a world to explore and then add collision gravity and exploration interactions (falling, climbing, sprinting, landing, )

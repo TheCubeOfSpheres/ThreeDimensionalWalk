@@ -104,9 +104,12 @@ class BasicCharacterController {
       const loader = new FBXLoader(this._manager);
       loader.setPath('/locomotion/');
       loader.load('Walking.fbx', (a) => { _OnLoad('walk', a); });
+      loader.load('Walking Backwards.fbx', (a) => { _OnLoad('walkbackwards', a); });
       loader.load('Fast Run.fbx', (a) => { _OnLoad('run', a); });
+      loader.load('Slow Jog Backwards.fbx', (a) => { _OnLoad('runBackwards', a); });
       loader.load('Idle.fbx', (a) => { _OnLoad('idle', a); });
       loader.load('Backflip.fbx', (a) => { _OnLoad('backflip', a); });
+      
       
     });
   }
@@ -438,8 +441,11 @@ class CharacterFSM extends FiniteStateMachine {
   _Init() {
     this._AddState('idle', IdleState);
     this._AddState('walk', WalkState);
+    this._AddState('walkbackwards', WalkbackwardsState);
     this._AddState('run', RunState);
+    this._AddState('runBackwards', RunBackwardsState);
     this._AddState('backflip', BackflipState);
+    
   }
 };
 
@@ -481,10 +487,12 @@ class IdleState extends State {
   }
 
   Update(_, input) {
-    if (input._keys.forward || input._keys.backward) {
+    if (input._keys.forward) {
       this._parent.SetState('walk');
     } else if (input._keys.space) {
       this._parent.SetState('backflip');
+    } else if (input._keys.backward) {
+        this._parent.SetState('walkbackwards');
     }
   }
 };
@@ -525,9 +533,56 @@ class WalkState extends State {
   }
 
   Update(timeElapsed, input) {
-    if (input._keys.forward || input._keys.backward) {
+    if (input._keys.forward) {
       if (input._keys.shift) {
         this._parent.SetState('run');
+      }
+      return;
+    }
+
+    this._parent.SetState('idle');
+  }
+};
+
+class WalkbackwardsState extends State {
+  constructor(parent) {
+    super(parent);
+  }
+
+  get Name() {
+    return 'walkbackwards';
+  }
+
+  Enter(prevState) {
+    const curAction = this._parent._proxy._animations['walkbackwards'].action;
+    if (prevState) {
+      const prevAction = this._parent._proxy._animations[prevState.Name].action;
+
+      curAction.enabled = true;
+
+      if (prevState.Name == 'idle') {
+        const ratio = curAction.getClip().duration / prevAction.getClip().duration;
+        curAction.time = prevAction.time * ratio;
+      } else {
+        curAction.time = 0.0;
+        curAction.setEffectiveTimeScale(1.0);
+        curAction.setEffectiveWeight(1.0);
+      }
+
+      curAction.crossFadeFrom(prevAction, 0.5, true);
+      curAction.play();
+    } else {
+      curAction.play();
+    }
+  }
+
+  Exit() {
+  }
+
+  Update(timeElapsed, input) {
+    if (input._keys.backward) {
+      if (input._keys.shift) {
+        this._parent.SetState('runBackwards');
       }
       return;
     }
@@ -554,6 +609,53 @@ class RunState extends State {
       curAction.enabled = true;
 
       if (prevState.Name == 'walk') {
+        const ratio = curAction.getClip().duration / prevAction.getClip().duration;
+        curAction.time = prevAction.time * ratio;
+      } else {
+        curAction.time = 0.0;
+        curAction.setEffectiveTimeScale(1.0);
+        curAction.setEffectiveWeight(1.0);
+      }
+
+      curAction.crossFadeFrom(prevAction, 0.5, true);
+      curAction.play();
+    } else {
+      curAction.play();
+    }
+  }
+
+  Exit() {
+  }
+
+  Update(timeElapsed, input) {
+    if (input._keys.forward || input._keys.backward) {
+      if (!input._keys.shift) {
+        this._parent.SetState('walk');
+      }
+      return;
+    }
+
+    this._parent.SetState('idle');
+  }
+};
+
+class RunBackwardsState extends State {
+  constructor(parent) {
+    super(parent);
+  }
+
+  get Name() {
+    return 'runBackwards';
+  }
+
+  Enter(prevState) {
+    const curAction = this._parent._proxy._animations['runBackwards'].action;
+    if (prevState) {
+      const prevAction = this._parent._proxy._animations[prevState.Name].action;
+
+      curAction.enabled = true;
+
+      if (prevState.Name == 'walkbackwards') {
         const ratio = curAction.getClip().duration / prevAction.getClip().duration;
         curAction.time = prevAction.time * ratio;
       } else {
